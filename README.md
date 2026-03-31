@@ -2,6 +2,8 @@
 
 A minimal proof-of-concept built for the GSoC 2026 application to [C2SI's GDB-UI project](https://github.com/c2siorg/GDB-UI). It demonstrates the two hardest architectural problems in the full project: per-user session isolation and real-time GDB output streaming over WebSocket.
 
+<img width="1908" height="1050" alt="Screenshot from 2026-04-01 03-49-47" src="https://github.com/user-attachments/assets/dac143d9-04df-4a1d-8b94-8e7bcb3750d5" />
+
 ## What this demonstrates
 
 ### 1. Per-user session isolation
@@ -78,7 +80,8 @@ Open `http://localhost:5173` in two separate browser tabs. Each tab gets a disti
 
 ## Demo
 
-[DEMO_VIDEO_URL]
+https://github.com/user-attachments/assets/d8730160-22ef-45c6-9829-daa0d2f41330
+
 
 The video shows two browser tabs running simultaneously with independent GDB sessions,
 and GDB output (breakpoint hits, execution events, program stdout) streaming live via
