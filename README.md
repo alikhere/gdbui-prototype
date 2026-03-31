@@ -78,7 +78,7 @@ Open `http://localhost:5173` in two separate browser tabs. Each tab gets a disti
 5. Use **Continue**, **Step Over**, **Step Into**, and **Finish** to drive execution. All GDB output streams live into the panel without any page interaction.
 6. Switch to the other tab — it has its own independent session. Compiling, setting breakpoints, and running in one tab does not affect the other.
 
-## Demo
+## Demo video
 
 https://github.com/user-attachments/assets/d8730160-22ef-45c6-9829-daa0d2f41330
 
