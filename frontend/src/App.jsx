@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import socket from './socket'
-import Editor from './Editor'
+import Editor from './components/Editor'
+import AppHeader from './components/AppHeader'
+import LanguageToggle from './components/LanguageToggle'
+import DebugControls from './components/DebugControls'
+import OutputPanel from './components/OutputPanel'
 import './App.css'
 
 const API = 'http://localhost:5000'
@@ -34,20 +38,6 @@ int main() {
     }
     return 0;
 }`
-
-function formatEntry(entry) {
-  if (['console', 'target'].includes(entry.type) && typeof entry.payload === 'string') {
-    return entry.payload
-  }
-  if (entry.type === 'log' && typeof entry.payload === 'string') {
-    return entry.payload
-  }
-  const msg = entry.message ? ` ${entry.message}` : ''
-  const payload = entry.payload
-    ? ' ' + (typeof entry.payload === 'string' ? entry.payload : JSON.stringify(entry.payload))
-    : ''
-  return `[${entry.type}]${msg}${payload}`
-}
 
 export default function App() {
   const [sessionId, setSessionId] = useState(null)
@@ -138,21 +128,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <header>
-        <img src="/c2si.png" alt="C2SI" height="30" />
-        <h1>GDB-UI Prototype</h1>
-        {backendError ? (
-          <div className="session-badge badge-error">
-            <span className="session-label">BACKEND OFFLINE</span>
-            <span className="session-id">start python app.py</span>
-          </div>
-        ) : (
-          <div className="session-badge">
-            <span className="session-label">SESSION</span>
-            <span className="session-id">{sessionId ? sessionId.slice(0, 8) : 'connecting…'}</span>
-          </div>
-        )}
-      </header>
+      <AppHeader backendError={backendError} sessionId={sessionId} />
 
       {backendError && (
         <div className="backend-banner">
@@ -165,76 +141,28 @@ export default function App() {
         <section className="left-panel">
           <div className="panel-top-row">
             <span className="panel-label">Source</span>
-            <div className="lang-toggle">
-              <button
-                className={`lang-btn${language === 'c' ? ' active' : ''}`}
-                onClick={() => switchLanguage('c')}
-              >
-                C
-              </button>
-              <button
-                className={`lang-btn${language === 'cpp' ? ' active' : ''}`}
-                onClick={() => switchLanguage('cpp')}
-              >
-                C++
-              </button>
-            </div>
+            <LanguageToggle language={language} onSwitch={switchLanguage} />
           </div>
 
           <Editor value={code} onChange={val => { setCode(val); setCompiled(false) }} />
 
-          {compileError && (
-            <pre className="compile-error">{compileError}</pre>
-          )}
-          <div className="controls">
-            <button
-              className="btn-compile"
-              onClick={handleCompile}
-              disabled={compiling || !sessionId}
-            >
-              {compiling ? 'Compiling…' : 'Compile'}
-            </button>
-            <div className="breakpoint-row">
-              <input
-                value={breakpoint}
-                onChange={e => setBreakpoint(e.target.value)}
-                placeholder="function or file:line"
-                disabled={!compiled}
-              />
-              <button
-                onClick={() => sendCommand(`-break-insert ${breakpoint}`)}
-                disabled={!compiled}
-              >
-                Set Breakpoint
-              </button>
-            </div>
-            <div className="exec-row">
-              <button onClick={() => sendCommand('-exec-run')} disabled={!compiled}>Run</button>
-              <button onClick={() => sendCommand('-exec-continue')} disabled={!compiled}>Continue</button>
-              <button onClick={() => sendCommand('-exec-next')} disabled={!compiled}>Step Over</button>
-              <button onClick={() => sendCommand('-exec-step')} disabled={!compiled}>Step Into</button>
-              <button onClick={() => sendCommand('-exec-finish')} disabled={!compiled}>Finish</button>
-            </div>
-          </div>
+          <DebugControls
+            sessionId={sessionId}
+            compiled={compiled}
+            compiling={compiling}
+            compileError={compileError}
+            breakpoint={breakpoint}
+            onBreakpointChange={setBreakpoint}
+            onCompile={handleCompile}
+            onSendCommand={sendCommand}
+          />
         </section>
 
-        <section className="right-panel">
-          <div className="output-header">
-            <span className="panel-label">GDB Output</span>
-            <button className="btn-clear" onClick={() => setOutput([])}>Clear</button>
-          </div>
-          <div className="output" ref={outputRef}>
-            {output.length === 0 ? (
-              <span className="output-empty">Compile a program to start debugging…</span>
-            ) : (
-              output.map((entry, i) => (
-                <div key={i} className={`output-line type-${entry.type}`}>
-                  {formatEntry(entry)}
-                </div>
-              ))
-            )}
-          </div>
-        </section>
+        <OutputPanel
+          output={output}
+          onClear={() => setOutput([])}
+          outputRef={outputRef}
+        />
       </main>
     </div>
   )
